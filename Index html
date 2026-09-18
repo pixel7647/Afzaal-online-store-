@@ -1,0 +1,151 @@
+from pathlib import Path
+import zipfile
+
+root = Path("/mnt/data/afzaal_complete")
+root.mkdir(exist_ok=True)
+
+html = r'''<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Afzaal Online Shop</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f6f6f6;color:#161616}
+a{text-decoration:none;color:inherit}button,input,select{font:inherit}
+.top{background:#111;color:#fff;text-align:center;padding:8px;font-size:13px}
+header{background:#fff;position:sticky;top:0;z-index:20;box-shadow:0 2px 12px #0001}
+.nav{max-width:1200px;margin:auto;padding:15px 18px;display:flex;align-items:center;gap:18px}
+.logo{font-size:24px;font-weight:800;white-space:nowrap}.logo span{color:#e63946}
+.search{flex:1;display:flex;border:1px solid #ddd;border-radius:8px;overflow:hidden}
+.search input{width:100%;border:0;padding:12px;outline:0}.search button{border:0;background:#111;color:#fff;padding:0 18px}
+.cartbtn{border:0;background:#e63946;color:#fff;border-radius:8px;padding:11px 15px;cursor:pointer;font-weight:bold}
+.hero{max-width:1200px;margin:20px auto;padding:0 18px}.heroBox{background:linear-gradient(110deg,#111,#333);color:#fff;border-radius:18px;padding:40px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.hero h1{font-size:38px;margin:0 0 10px}.hero p{color:#ddd}.shopBtn{display:inline-block;background:#e63946;color:white;padding:12px 20px;border-radius:8px;font-weight:bold}
+.container{max-width:1200px;margin:auto;padding:0 18px 40px}
+.cats{display:flex;gap:10px;overflow:auto;padding:8px 0 18px}.cat{border:1px solid #ddd;background:#fff;border-radius:20px;padding:9px 16px;cursor:pointer;white-space:nowrap}.cat.active{background:#111;color:#fff}
+.head{display:flex;justify-content:space-between;align-items:center;margin:10px 0}.head h2{margin:0}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.card{background:#fff;border-radius:13px;overflow:hidden;box-shadow:0 3px 14px #0000000b;position:relative}.photo{height:240px;background:#eee;overflow:hidden;position:relative}.photo img{width:100%;height:100%;object-fit:cover}.badge{position:absolute;top:10px;left:10px;background:#e63946;color:#fff;padding:5px 8px;border-radius:5px;font-size:12px;font-weight:bold}.heart{position:absolute;top:10px;right:10px;border:0;background:#fff;border-radius:50%;width:35px;height:35px;cursor:pointer}
+.info{padding:14px}.catname{font-size:12px;color:#777}.name{font-weight:700;margin:6px 0}.price{font-size:19px;font-weight:800}.old{text-decoration:line-through;color:#999;font-size:13px;margin-left:5px}.buy{margin-top:10px;width:100%;border:0;background:#111;color:#fff;padding:11px;border-radius:8px;cursor:pointer}
+.features{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0}.feature{background:#fff;padding:18px;border-radius:12px;text-align:center}.feature b{display:block;margin-bottom:5px}
+footer{background:#111;color:#fff;padding:30px 18px;text-align:center}.wa{color:#35d06f;font-weight:bold}
+.overlay{display:none;position:fixed;inset:0;background:#0008;z-index:50}.drawer{position:absolute;right:0;top:0;height:100%;width:min(460px,94%);background:#fff;padding:20px;overflow:auto}.close{float:left;border:0;background:#eee;border-radius:7px;padding:7px 10px;cursor:pointer}.drawer h2{margin-top:8px}.cartrow{display:flex;gap:10px;border-bottom:1px solid #eee;padding:12px 0}.thumb{width:65px;height:65px;border-radius:8px;object-fit:cover}.grow{flex:1}.qty button{border:1px solid #ddd;background:#fff;width:28px;height:28px;border-radius:5px}.total{font-size:21px;font-weight:800;margin:18px 0}.form input{width:100%;padding:11px;margin:5px 0 10px;border:1px solid #ddd;border-radius:7px}.checkout{width:100%;padding:13px;background:#25d366;color:#fff;border:0;border-radius:8px;font-weight:bold;cursor:pointer}
+.modal{display:none;position:fixed;inset:0;background:#0008;z-index:60;align-items:center;justify-content:center;padding:15px}.modalbox{background:#fff;width:min(700px,100%);max-height:90vh;overflow:auto;border-radius:15px;padding:20px}.productDetail{display:grid;grid-template-columns:1fr 1fr;gap:20px}.productDetail img{width:100%;border-radius:10px}.detailPrice{font-size:27px;font-weight:bold}.size{padding:10px;border:1px solid #ddd;border-radius:7px;margin:4px;cursor:pointer;background:#fff}
+@media(max-width:900px){.grid{grid-template-columns:repeat(3,1fr)}.features{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.nav{flex-wrap:wrap}.logo{font-size:20px}.search{order:3;flex-basis:100%}.heroBox{padding:25px}.hero h1{font-size:28px}.grid{grid-template-columns:repeat(2,1fr);gap:10px}.photo{height:190px}.productDetail{grid-template-columns:1fr}}
+@media(max-width:420px){.grid{grid-template-columns:1fr 1fr}.photo{height:165px}.info{padding:10px}.name{font-size:14px}.price{font-size:17px}}
+</style>
+</head>
+<body>
+<div class="top">🚚 Cash on Delivery Available • 🇵🇰 Delivery Across Pakistan</div>
+<header><div class="nav">
+<div class="logo">Afzaal <span>Online Shop</span></div>
+<div class="search"><input id="search" placeholder="Search shoes, clothes, cosmetics..." oninput="render()"><button>🔍</button></div>
+<button class="cartbtn" onclick="openCart()">🛒 Cart <span id="count">0</span></button>
+</div></header>
+
+<section class="hero"><div class="heroBox">
+<div><h1>Shop Smart. Shop Easy.</h1><p>Trending shoes, clothes, cosmetics & accessories at affordable prices.</p><a class="shopBtn" href="#shop">Shop Now</a></div>
+<div style="font-size:90px">🛍️</div>
+</div></section>
+
+<main class="container" id="shop">
+<div class="cats" id="cats"></div>
+<div class="head"><h2>Featured Products</h2><select id="sort" onchange="render()"><option value="default">Sort</option><option value="low">Price: Low to High</option><option value="high">Price: High to Low</option></select></div>
+<div class="grid" id="products"></div>
+<div class="features">
+<div class="feature">🚚<b>COD</b>Pay on delivery</div><div class="feature">📱<b>WhatsApp Orders</b>Easy ordering</div><div class="feature">🔄<b>Support</b>Contact us anytime</div><div class="feature">🇵🇰<b>Pakistan</b>PKR pricing</div>
+</div>
+</main>
+
+<footer>© 2026 Afzaal Online Shop<br><br>WhatsApp: <a class="wa" href="https://wa.me/923447995482">+92 344 7995482</a></footer>
+
+<div class="overlay" id="cartOverlay"><div class="drawer">
+<button class="close" onclick="closeCart()">✕</button><h2>🛒 Your Cart</h2><div id="cartItems"></div><div class="total">Total: Rs. <span id="total">0</span></div>
+<div class="form"><h3>Delivery Details</h3><input id="name" placeholder="Full name"><input id="phone" placeholder="Mobile number"><input id="address" placeholder="Complete address"></div>
+<button class="checkout" onclick="orderWhatsApp()">Order on WhatsApp</button>
+</div></div>
+
+<div class="modal" id="productModal"><div class="modalbox">
+<button class="close" onclick="closeProduct()">✕</button><div id="detail"></div>
+</div></div>
+
+<script>
+const WA="923447995482";
+const products=[
+{id:1,name:"Classic White Sneakers",cat:"Shoes",price:3499,old:4299,img:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=85"},
+{id:2,name:"Casual Sports Shoes",cat:"Shoes",price:3999,old:4999,img:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=85"},
+{id:3,name:"Women Fashion Sandals",cat:"Shoes",price:2499,old:2999,img:"https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=900&q=85"},
+{id:4,name:"Classic Cotton T-Shirt",cat:"Clothes",price:1799,old:2299,img:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=85"},
+{id:5,name:"Women Fashion Dress",cat:"Clothes",price:2999,old:3799,img:"https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=900&q=85"},
+{id:6,name:"Baggy Denim Jeans",cat:"Clothes",price:2799,old:3499,img:"https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=900&q=85"},
+{id:7,name:"Makeup Beauty Kit",cat:"Cosmetics",price:2199,old:2799,img:"https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=900&q=85"},
+{id:8,name:"Matte Lipstick",cat:"Cosmetics",price:999,old:1299,img:"https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=900&q=85"},
+{id:9,name:"Face Care Set",cat:"Cosmetics",price:1899,old:2399,img:"https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=900&q=85"},
+{id:10,name:"Classic Fashion Watch",cat:"Accessories",price:2299,old:2999,img:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=900&q=85"},
+{id:11,name:"Ladies Handbag",cat:"Accessories",price:2599,old:3299,img:"https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=900&q=85"},
+{id:12,name:"Classic Sunglasses",cat:"Accessories",price:1299,old:1699,img:"https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=900&q=85"}
+];
+let active="All",cart=[];
+
+function init(){renderCats();render();}
+function renderCats(){let cs=["All",...new Set(products.map(p=>p.cat))];cats.innerHTML=cs.map(c=>`<button class="cat ${c===active?"active":""}" onclick="active='${c}';renderCats();render()">${c}</button>`).join("")}
+function render(){
+let q=search.value.toLowerCase();let list=products.filter(p=>(active==="All"||p.cat===active)&&p.name.toLowerCase().includes(q));
+if(sort.value==="low")list.sort((a,b)=>a.price-b.price);if(sort.value==="high")list.sort((a,b)=>b.price-a.price);
+productsEl.innerHTML=list.map(p=>`<article class="card">
+<div class="photo" onclick="showProduct(${p.id})"><img src="${p.img}" alt="${p.name}" loading="lazy"><span class="badge">SALE</span><button class="heart" onclick="event.stopPropagation();this.textContent=this.textContent==='♡'?'♥':'♡'">♡</button></div>
+<div class="info"><div class="catname">${p.cat}</div><div class="name">${p.name}</div><div><span class="price">Rs. ${p.price.toLocaleString()}</span> <span class="old">Rs. ${p.old.toLocaleString()}</span></div><button class="buy" onclick="add(${p.id})">Add to Cart</button></div>
+</article>`).join("")}
+function add(id){let x=cart.find(a=>a.id===id);if(x)x.qty++;else cart.push({id,qty:1});update();openCart()}
+function update(){
+count.textContent=cart.reduce((s,x)=>s+x.qty,0);
+cartItems.innerHTML=cart.length?cart.map(x=>{let p=products.find(a=>a.id===x.id);return `<div class="cartrow"><img class="thumb" src="${p.img}"><div class="grow"><b>${p.name}</b><br>Rs. ${p.price.toLocaleString()}<div class="qty"><button onclick="change(${p.id},-1)">−</button> ${x.qty} <button onclick="change(${p.id},1)">+</button></div></div><button onclick="removeItem(${p.id})">🗑️</button></div>`}).join(""):"<p>Your cart is empty.</p>";
+total.textContent=cart.reduce((s,x)=>s+products.find(p=>p.id===x.id).price*x.qty,0).toLocaleString()
+}
+function change(id,n){let x=cart.find(a=>a.id===id);x.qty+=n;if(x.qty<=0)cart=cart.filter(a=>a.id!==id);update()}
+function removeItem(id){cart=cart.filter(x=>x.id!==id);update()}
+function openCart(){cartOverlay.style.display="block";update()}function closeCart(){cartOverlay.style.display="none"}
+function showProduct(id){let p=products.find(x=>x.id===id);detail.innerHTML=`<div class="productDetail"><img src="${p.img}"><div><div class="catname">${p.cat}</div><h2>${p.name}</h2><div class="detailPrice">Rs. ${p.price.toLocaleString()}</div><p><s>Rs. ${p.old.toLocaleString()}</s> &nbsp; <b>Cash on Delivery</b></p><p>Quality fashion and lifestyle product. Check availability before confirming your order.</p><button class="buy" onclick="add(${p.id});closeProduct()">Add to Cart</button></div></div>`;productModal.style.display="flex"}
+function closeProduct(){productModal.style.display="none"}
+function orderWhatsApp(){
+if(!cart.length)return alert("Cart is empty.");
+if(!name.value||!phone.value||!address.value)return alert("Please enter name, mobile and address.");
+let msg="*New Order - Afzaal Online Shop*\\n\\n";cart.forEach(x=>{let p=products.find(a=>a.id===x.id);msg+=`${p.name} x ${x.qty} = Rs. ${p.price*x.qty}\\n`});
+let t=cart.reduce((s,x)=>s+products.find(p=>p.id===x.id).price*x.qty,0);msg+=`\\n*Total: Rs. ${t}*\\nName: ${name.value}\\nMobile: ${phone.value}\\nAddress: ${address.value}`;
+window.open("https://wa.me/"+WA+"?text="+encodeURIComponent(msg),"_blank");
+}
+init();
+</script>
+</body>
+</html>'''
+
+(root/"index.html").write_text(html,encoding="utf-8")
+(root/"README.txt").write_text(
+"""AFZAAL ONLINE SHOP - COMPLETE STARTER STORE
+
+WhatsApp orders: +92 344 7995482
+
+Included:
+- Responsive Amazon-style product grid
+- Shoes, clothes, cosmetics and accessories
+- Product photos, sale prices and categories
+- Search and sorting
+- Product detail popup
+- Cart with quantity controls
+- Customer delivery form
+- WhatsApp order checkout
+- COD messaging
+
+IMPORTANT:
+The product prices are starter/demo prices, not verified supplier prices.
+The product images are remote stock images used for the demo. Replace them with photos of your actual products before selling.
+This is a front-end starter store. It does not include a secure database, admin dashboard, courier API, or online payment gateway.
+""",encoding="utf-8")
+
+zip_path=Path("/mnt/data/afzaal-online-shop-complete.zip")
+with zipfile.ZipFile(zip_path,"w",zipfile.ZIP_DEFLATED) as z:
+    z.write(root/"index.html","index.html")
+    z.write(root/"README.txt","README.txt")
+print(zip_path)
